@@ -1,0 +1,14 @@
+{
+  "id": "zz-test-item",
+  "title": "خبر تجريبي للحذف",
+  "en_title": "Test item to delete",
+  "date_iso": "2026-11-25",
+  "cat": "visits",
+  "tag": "اختبار",
+  "ar": [
+    "نص تجريبي"
+  ],
+  "en": [
+    "test text"
+  ]
+}
