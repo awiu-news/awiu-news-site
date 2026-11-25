@@ -23,12 +23,22 @@ M=json.load(open('data/misc.json',encoding='utf-8')); YT=[tuple(x) for x in M['Y
 items=[]
 for f in glob.glob('content/*.json'):
     o=json.load(open(f,encoding='utf-8'))
-    o.setdefault('cats',None); o['cats']=o['cats'] or [o['cat']]
+    if not o.get('date_iso') and not o.get('date_text'):
+        import datetime; o['date_iso']=datetime.date.today().isoformat()
     if o.get('date_iso'):
         y,m,d=map(int,str(o['date_iso'])[:10].split('-')); o['date']=f"{d} {MONR[m]} {y}"
     else: o['date']=o.get('date_text') or ''
-    o['ar']=[p for p in (o.get('ar') or []) if p]; o['en']=[p for p in (o.get('en') or []) if p]
-    o['tags']=[t.strip().lstrip('#').replace(' ','_') for t in (o.get('tags') or []) if t and t.strip()]
+    o['id']=o.get('id') or os.path.basename(f)[:-5]
+    _sp=lambda s:[p.strip() for p in re.split(r'\n\s*\n',(s or '').replace('\r\n','\n')) if p.strip()]
+    o['ar']=_sp(o.get('body')) if o.get('body') else [p for p in (o.get('ar') or []) if p]
+    o['en']=_sp(o.get('en_body')) if o.get('en_body') else [p for p in (o.get('en') or []) if p]
+    _tg=re.split(r'[\s,،#]+',o.get('hashtags') or '') if o.get('hashtags') is not None else (o.get('tags') or [])
+    o['tags']=[t.strip().lstrip('#').replace(' ','_') for t in _tg if t and t.strip()]
+    if not o.get('cat'):
+        _t=o.get('title','')
+        o['cat']=('agreements' if re.search('اتفاق|بروتوكول|مذكرة',_t) else 'summit' if re.search('قمة|القمة',_t) else 'forums' if re.search('ملتقى|منتدى|مؤتمر',_t) else 'visits' if re.search('زيارة|يستقبل|تستقبل|لقاء',_t) else 'intl')
+    o['cats']=o.get('cats') or [o['cat']]
+    if not o.get('tag'): o['tag']={'visits':'زيارة','forums':'ملتقى','summit':'القمة','intl':'مشاركة دولية','agreements':'اتفاقية'}[o['cat']]
     for t in reversed(BASE):
         if t not in o['tags']: o['tags'].insert(0,t)
     o['tag']=o.get('tag') or ''
@@ -108,7 +118,7 @@ for i in items:
     vid=f'<div class="vid"><iframe src="https://www.youtube.com/embed/{i["video"]}" allowfullscreen></iframe></div>' if i.get('video') else ''
     im=f'<img class="hero-i" src="/img/{i["img"]}.jpg" alt="{E(i["title"])}" loading="eager">' if i['img'] and not i.get('video') else ''
     catn={c:a for c,a,e in CATS}[i['cat']]
-    page=head(i['title']+' | اتحاد المستثمرات العرب',desc,url,imgurl(i),'article')+header(i['cat'])+f'''<div class="art"><a class="back" href="/#{i['cat']}">← {catn} · العودة للأخبار</a><div><span class="tag">{i['tag']}</span> <time class="date" datetime="{i.get('date_iso') or ''}">{i['date']}</time></div><h1>{E(i['title'])}</h1><div class="en-h">{E(i['en_title'])}</div>{im}{body}{vid}<div class="en-t">{''.join('<p>'+E(p)+'</p>' for p in i['en'])}</div>
+    page=head(i['title']+' | اتحاد المستثمرات العرب',desc,url,imgurl(i),'article')+header(i['cat'])+f'''<div class="art"><a class="back" href="/#{i['cat']}">← {catn} · العودة للأخبار</a><div><span class="tag">{i['tag']}</span> <time class="date" datetime="{i.get('date_iso') or ''}">{i['date']}</time> <span class="vw" data-id="{i['id']}" style="margin-inline-start:14px;color:var(--mute);font-size:15px">عدد المشاهدات: <b>…</b></span></div><h1>{E(i['title'])}</h1><div class="en-h">{E(i['en_title'])}</div>{im}{body}{vid}<div class="en-t">{''.join('<p>'+E(p)+'</p>' for p in i['en'])}</div>
 <aside class="utl" aria-label="مشاركة الخبر"><h2>مشاركة الخبر · Share this article</h2>{LB}{SHB}<div class="tg"><span>الوسوم · Tags</span><div class="ht">{HT(i)}</div></div></aside></div>{FOOT}
 '''+SHARE_JS
     os.makedirs(f"{OUT}/news/{i['id']}"); open(f"{OUT}/news/{i['id']}/index.html",'w',encoding='utf-8').write(page)
@@ -194,3 +204,11 @@ for _p in glob.glob(OUT+'/**/*.html',recursive=True):
     _t=_t.replace('</head>','<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#0d1117"><link rel="apple-touch-icon" href="/img/icon-192.png"></head>',1)
     _t=_t.replace('</body>','<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js")</script></body>',1)
     open(_p,'w',encoding='utf-8').write(_t)
+
+# ---- view counter + article list ----
+open(OUT+'/articles.json','w',encoding='utf-8').write(json.dumps({i['id']:i['title'] for i in items},ensure_ascii=False))
+_VJ='<script>(function(){var s=document.querySelector(".vw");if(!s)return;var id=s.dataset.id,b=s.querySelector("b"),k="v_"+id,now=Date.now();function show(n){b.textContent=(n||0).toLocaleString("ar-EG")}var skip=0,last=0;try{skip=localStorage.getItem("awiu_noview");last=+localStorage.getItem(k)||0}catch(e){}var post=!skip&&now-last>43200000&&navigator.webdriver!==true;fetch("/api/view?id="+id,post?{method:"POST"}:{}).then(function(r){return r.json()}).then(function(j){show(j.n);if(post)try{localStorage.setItem(k,now)}catch(e){}}).catch(function(){s.style.display="none"})})()</script>'
+for _p in glob.glob(OUT+'/news/*/index.html'):
+    _t=open(_p,encoding='utf-8').read()
+    if 'class="vw"' in _t and '/api/view' not in _t:
+        open(_p,'w',encoding='utf-8').write(_t.replace('</body>',_VJ+'</body>',1))

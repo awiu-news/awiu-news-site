@@ -18,37 +18,24 @@ collections:
     create: true
     editor:
       preview: false
-    slug: "{{fields.id}}"
+    slug: "n-{{year}}{{month}}{{day}}-{{hour}}{{minute}}{{second}}"
     summary: "{{date_iso}} · {{title}}"
     fields:
-      - {label: "معرف قصير بالإنجليزية (حروف صغيرة وشرطة فقط، مثال: nile-forum)", name: id, widget: string, pattern: ['^[a-z0-9-]+$', "حروف إنجليزية صغيرة وأرقام وشرطة فقط"]}
-      - {label: "العنوان (عربي)", name: title, widget: string}
-      - {label: "Title (English)", name: en_title, widget: string, required: false}
-      - {label: "التاريخ", name: date_iso, widget: datetime, date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD", required: false, hint: "اختر التاريخ. اتركه فارغا لو ستكتب تاريخا نصيا"}
-      - {label: "تاريخ نصي (اختياري، مثال: أكتوبر 2026 أو 25 و26 نوفمبر 2026)", name: date_text, widget: string, required: false}
-      - label: "القسم الرئيسي"
+      - {label: "عنوان الخبر", name: title, widget: string, hint: "اكتب العنوان هنا"}
+      - {label: "صورة الخبر", name: image, widget: image, required: false, media_library: {config: {max_file_size: 4000000}}}
+      - {label: "نص الخبر (تفاصيل الخبر)", name: body, widget: text, hint: "اكتب الخبر كاملا. لفصل الفقرات اترك سطرا فارغا بين كل فقرة والتي بعدها"}
+      - {label: "الوسوم (الهاشتاجات)", name: hashtags, widget: string, required: false, hint: "مثال: #اتحاد_المستثمرات_العرب #د_هدى_يسى . اكتب كل وسم بعد مسافة، وبدل المسافة داخل الوسم اكتب _"}
+      - {label: "التاريخ (يُكتب اليوم تلقائيا، لا تغيّره للأخبار القديمة)", name: date_iso, widget: datetime, date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD", required: false}
+      - label: "القسم (اختياري، لو تركته فارغا يتحدد تلقائيا)"
         name: cat
         widget: select
-        options:
-          - {label: "زيارات · Visits", value: visits}
-          - {label: "ملتقيات · Forums", value: forums}
-          - {label: "أخبار القمة · Summit News", value: summit}
-          - {label: "مشاركات دولية · International", value: intl}
-          - {label: "اتفاقيات وبروتوكولات · Agreements", value: agreements}
-      - label: "أقسام إضافية (اختياري)"
-        name: cats
-        widget: select
-        multiple: true
         required: false
         options:
-          - {label: "زيارات · Visits", value: visits}
-          - {label: "ملتقيات · Forums", value: forums}
-          - {label: "أخبار القمة · Summit News", value: summit}
-          - {label: "مشاركات دولية · International", value: intl}
-          - {label: "اتفاقيات وبروتوكولات · Agreements", value: agreements}
-      - {label: "وسم القسم على البطاقة (مثال: زيارات)", name: tag, widget: string}
-      - {label: "الصورة", name: image, widget: image, required: false, media_library: {config: {max_file_size: 4000000}}}
-      - {label: "رابط فيديو يوتيوب (كود الفيديو فقط، اختياري)", name: video, widget: string, required: false}
-      - {label: "الخبر بالعربية (كل فقرة في خانة)", name: ar, widget: list, field: {label: "فقرة", name: p, widget: text}}
-      - {label: "Article in English (one paragraph per box)", name: en, widget: list, required: false, field: {label: "Paragraph", name: p, widget: text}}
-      - {label: "الهاشتاجات (بدون #، بشرطة سفلية بدل المسافة)", name: tags, widget: list, required: false}
+          - {label: "زيارات", value: visits}
+          - {label: "ملتقيات", value: forums}
+          - {label: "أخبار القمة", value: summit}
+          - {label: "مشاركات دولية", value: intl}
+          - {label: "اتفاقيات وبروتوكولات", value: agreements}
+      - {label: "كود فيديو يوتيوب (اختياري)", name: video, widget: string, required: false}
+      - {label: "العنوان بالإنجليزية (اختياري)", name: en_title, widget: string, required: false}
+      - {label: "الخبر بالإنجليزية (اختياري، فقرة بينها سطر فارغ)", name: en_body, widget: text, required: false}
