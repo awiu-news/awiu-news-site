@@ -17,7 +17,7 @@ collections:
     format: json
     create: true
     slug: "{{fields.id}}"
-    summary: "{{date_text}}{{date_iso}} · {{title}}"
+    summary: "{{date_iso}} · {{title}}"
     fields:
       - {label: "معرف قصير بالإنجليزية (حروف صغيرة وشرطة فقط، مثال: nile-forum)", name: id, widget: string, pattern: ['^[a-z0-9-]+$', "حروف إنجليزية صغيرة وأرقام وشرطة فقط"]}
       - {label: "العنوان (عربي)", name: title, widget: string}
