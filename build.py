@@ -175,3 +175,5 @@ sm='<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org
 open(OUT+'/sitemap.xml','w',encoding='utf-8').write(sm)
 open(OUT+'/robots.txt','w').write(f"User-agent: *\n{'Disallow' if 'preview' in SITE else 'Allow'}: /\n\nSitemap: {SITE}/sitemap.xml\n")
 print(len(items),'items')
+
+for _f in glob.glob("google*.html"): shutil.copy(_f,OUT+"/"+_f)
