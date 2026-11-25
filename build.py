@@ -62,7 +62,7 @@ nav a.on{color:var(--gold);border-bottom:2px solid var(--gold)}
 .art img.hero-i{width:100%;border-radius:14px;margin:12px 0 20px;max-height:520px;object-fit:cover}
 .art p{margin-bottom:14px;font-size:21px}.art .en-t{font-size:17px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
 .vid{aspect-ratio:16/9;margin:18px 0}.vid iframe{width:100%;height:100%;border:0;border-radius:12px}
-.lb{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:10px 14px;margin:14px 0;font-size:15px;color:var(--mute)}.lu{flex:1;min-width:200px;background:#0b1018;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:15px}.lb button{background:var(--gold);color:#111;border:0;border-radius:20px;padding:6px 16px;font:inherit;font-weight:700;cursor:pointer}.share{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0;align-items:center;font-size:15px;color:var(--mute)}
+.utl{margin-top:34px;padding-top:6px;border-top:1px solid var(--line)}.utl h2{font-size:17px;color:var(--gold);margin:18px 0 6px}.utl .lb{margin:10px 0}.tg{margin-top:14px}.tg>span{font-size:14px;color:var(--mute)}.utl .ht{margin:4px 0;font-size:16px}.lb{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:10px 14px;margin:14px 0;font-size:15px;color:var(--mute)}.lu{flex:1;min-width:200px;background:#0b1018;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:15px}.lb button{background:var(--gold);color:#111;border:0;border-radius:20px;padding:6px 16px;font:inherit;font-weight:700;cursor:pointer}.share{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0;align-items:center;font-size:15px;color:var(--mute)}
 .share a,.share button{background:#222b3a;color:var(--text);border:1px solid var(--line);border-radius:20px;padding:2px 14px;font:inherit;font-size:15px;cursor:pointer}
 .share a:hover,.share button:hover{border-color:var(--gold);color:var(--gold)}
 .back{display:inline-block;color:var(--gold);margin-bottom:10px}
@@ -100,15 +100,16 @@ SHARE_JS='''<script>var u=location.href.split("#")[0],t=document.querySelector("
 # article pages
 for i in items:
     url=f"{SITE}/news/{i['id']}/"
-    desc=i['ar'][0][:200]
+    desc=i['ar'][0]
+    if len(desc)>160: desc=desc[:160].rsplit(' ',1)[0]+'…'
     LB=f'<div class="lb"><span>رابط الخبر · Article link</span><input class="lu" type="text" readonly dir="ltr" value="{url}" onclick="this.select()"><button type="button" class="cpb">نسخ الرابط · Copy link</button></div>'
-    SHB='<div class="share"><span>مشاركة · Share:</span><a target="_blank" rel="noopener" class="wa">WhatsApp</a><a target="_blank" rel="noopener" class="fbs">Facebook</a><a target="_blank" rel="noopener" class="xs">X</a><button type="button" class="cpb">نسخ الرابط · Copy link</button></div>'
+    SHB='<div class="share"><span>مشاركة · Share:</span><a target="_blank" rel="noopener" class="wa">WhatsApp</a><a target="_blank" rel="noopener" class="fbs">Facebook</a><a target="_blank" rel="noopener" class="xs">X</a></div>'
     body=''.join(f'<p>{E(p)}</p>' for p in i['ar'])
     vid=f'<div class="vid"><iframe src="https://www.youtube.com/embed/{i["video"]}" allowfullscreen></iframe></div>' if i.get('video') else ''
-    im=f'<img class="hero-i" src="/img/{i["img"]}.jpg" alt="">' if i['img'] and not i.get('video') else ''
+    im=f'<img class="hero-i" src="/img/{i["img"]}.jpg" alt="{E(i["title"])}" loading="eager">' if i['img'] and not i.get('video') else ''
     catn={c:a for c,a,e in CATS}[i['cat']]
-    page=head(i['title']+' | اتحاد المستثمرات العرب',desc,url,imgurl(i),'article')+header(i['cat'])+f'''<div class="art"><a class="back" href="/#{i['cat']}">← {catn} · العودة للأخبار</a><div><span class="tag">{i['tag']}</span> <span class="date">{i['date']}</span></div><h1>{E(i['title'])}</h1><div class="en-h">{E(i['en_title'])}</div><div class="ht">{HT(i)}</div>{LB}{im}{body}{vid}<div class="en-t">{''.join('<p>'+E(p)+'</p>' for p in i['en'])}</div>
-{SHB}</div>{FOOT}
+    page=head(i['title']+' | اتحاد المستثمرات العرب',desc,url,imgurl(i),'article')+header(i['cat'])+f'''<div class="art"><a class="back" href="/#{i['cat']}">← {catn} · العودة للأخبار</a><div><span class="tag">{i['tag']}</span> <time class="date" datetime="{i.get('date_iso') or ''}">{i['date']}</time></div><h1>{E(i['title'])}</h1><div class="en-h">{E(i['en_title'])}</div>{im}{body}{vid}<div class="en-t">{''.join('<p>'+E(p)+'</p>' for p in i['en'])}</div>
+<aside class="utl" aria-label="مشاركة الخبر"><h2>مشاركة الخبر · Share this article</h2>{LB}{SHB}<div class="tg"><span>الوسوم · Tags</span><div class="ht">{HT(i)}</div></div></aside></div>{FOOT}
 '''+SHARE_JS
     os.makedirs(f"{OUT}/news/{i['id']}"); open(f"{OUT}/news/{i['id']}/index.html",'w',encoding='utf-8').write(page)
 # home
@@ -172,7 +173,10 @@ urls=[(SITE+'/',None)]
 for i in items:
     y,m,d=dkey(i); iso=min(datetime.date(y,m,d),datetime.date.today()).isoformat(); urls.append((f"{SITE}/news/{i['id']}/",iso))
     art={"@context":"https://schema.org","@type":"NewsArticle","headline":i['title'][:110],"alternativeHeadline":i.get('en_title',''),"datePublished":iso,"dateModified":iso,"inLanguage":"ar","image":[imgurl(i)],"mainEntityOfPage":f"{SITE}/news/{i['id']}/","articleBody":' '.join(i['ar'])[:5000],"keywords":', '.join(i['tags']),"author":{"@type":"Organization","name":"اتحاد المستثمرات العرب"},"publisher":{"@type":"Organization","name":"اتحاد المستثمرات العرب","logo":{"@type":"ImageObject","url":SITE+"/img/logo.jpg"}}}
-    inject(f"{OUT}/news/{i['id']}/index.html",f"{SITE}/news/{i['id']}/",ld(art)+ld(ORG))
+    bc={"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"الرئيسية","item":SITE+"/"},{"@type":"ListItem","position":2,"name":i['title'][:110],"item":f"{SITE}/news/{i['id']}/"}]}
+    art["isAccessibleForFree"]=True; art["thumbnailUrl"]=imgurl(i)
+    og=f'<meta property="article:published_time" content="{iso}"><meta property="article:section" content="{E(i["tag"])}"><meta property="og:image:alt" content="{E(i["title"])}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="alternate" hreflang="ar" href="{SITE}/news/{i["id"]}/">'
+    inject(f"{OUT}/news/{i['id']}/index.html",f"{SITE}/news/{i['id']}/",og+ld(art)+ld(bc)+ld(ORG))
 sm='<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join(f'<url><loc>{u}</loc>'+(f'<lastmod>{d}</lastmod>' if d else '')+'</url>' for u,d in urls)+'</urlset>'
 open(OUT+'/sitemap.xml','w',encoding='utf-8').write(sm)
 open(OUT+'/robots.txt','w').write(f"User-agent: *\n{'Disallow' if 'preview' in SITE else 'Allow'}: /\n\nSitemap: {SITE}/sitemap.xml\n")
