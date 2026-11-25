@@ -62,7 +62,7 @@ nav a.on{color:var(--gold);border-bottom:2px solid var(--gold)}
 .art img.hero-i{width:100%;border-radius:14px;margin:12px 0 20px;max-height:520px;object-fit:cover}
 .art p{margin-bottom:14px;font-size:21px}.art .en-t{font-size:17px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
 .vid{aspect-ratio:16/9;margin:18px 0}.vid iframe{width:100%;height:100%;border:0;border-radius:12px}
-.share{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0;align-items:center;font-size:15px;color:var(--mute)}
+.lb{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:10px 14px;margin:14px 0;font-size:15px;color:var(--mute)}.lu{flex:1;min-width:200px;background:#0b1018;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:15px}.lb button{background:var(--gold);color:#111;border:0;border-radius:20px;padding:6px 16px;font:inherit;font-weight:700;cursor:pointer}.share{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0;align-items:center;font-size:15px;color:var(--mute)}
 .share a,.share button{background:#222b3a;color:var(--text);border:1px solid var(--line);border-radius:20px;padding:2px 14px;font:inherit;font-size:15px;cursor:pointer}
 .share a:hover,.share button:hover{border-color:var(--gold);color:var(--gold)}
 .back{display:inline-block;color:var(--gold);margin-bottom:10px}
@@ -96,17 +96,19 @@ def HT(i): return ' '.join('#'+t for t in i['tags'])
 def card(i,big=False):
     ph=f'<div class="ph" style="background-image:url(/img/{i["img"]}.jpg)"></div>' if i['img'] else '<div class="ph logo" style="background-image:url(/img/logo.jpg)"></div>'
     return f'<a class="nc{" big" if big else ""}" href="/news/{i["id"]}/" data-cat="{" ".join(i["cats"])}">{ph}<div class="tx"><span class="tag">{i["tag"]}</span> <span class="date">{i["date"]}</span><h4>{E(i["title"])}</h4><div class="e">{E(i["en_title"])}</div><div class="ht">{HT(i)}</div></div></a>'
-SHARE_JS='''<script>var u=location.href.split("#")[0],t=document.querySelector("h1").textContent+"\n"+document.querySelector(".ht").textContent;document.getElementById("wa").href="https://wa.me/?text="+encodeURIComponent(t+"\n"+u);document.getElementById("fbs").href="https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(u)+"&quote="+encodeURIComponent(t);document.getElementById("cp").onclick=function(){var b=this;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){b.textContent="تم النسخ ✓"},function(){prompt("انسخ الرابط",u)})}</script></body></html>'''
+SHARE_JS='''<script>var u=location.href.split("#")[0],t=document.querySelector("h1").textContent;function q(c,f){document.querySelectorAll(c).forEach(f)}q(".wa",function(a){a.href="https://wa.me/?text="+encodeURIComponent(t+"\n"+u)});q(".fbs",function(a){a.href="https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(u)});q(".xs",function(a){a.href="https://twitter.com/intent/tweet?url="+encodeURIComponent(u)+"&text="+encodeURIComponent(t)});q(".cpb",function(b){b.onclick=function(){var o=b.textContent;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){b.textContent="تم النسخ ✓";setTimeout(function(){b.textContent=o},2000)},function(){var i=document.querySelector(".lu");i.select();document.execCommand("copy");b.textContent="تم النسخ ✓"})}})</script></body></html>'''
 # article pages
 for i in items:
     url=f"{SITE}/news/{i['id']}/"
     desc=i['ar'][0][:200]
+    LB=f'<div class="lb"><span>رابط الخبر · Article link</span><input class="lu" type="text" readonly dir="ltr" value="{url}" onclick="this.select()"><button type="button" class="cpb">نسخ الرابط · Copy link</button></div>'
+    SHB='<div class="share"><span>مشاركة · Share:</span><a target="_blank" rel="noopener" class="wa">WhatsApp</a><a target="_blank" rel="noopener" class="fbs">Facebook</a><a target="_blank" rel="noopener" class="xs">X</a><button type="button" class="cpb">نسخ الرابط · Copy link</button></div>'
     body=''.join(f'<p>{E(p)}</p>' for p in i['ar'])
     vid=f'<div class="vid"><iframe src="https://www.youtube.com/embed/{i["video"]}" allowfullscreen></iframe></div>' if i.get('video') else ''
     im=f'<img class="hero-i" src="/img/{i["img"]}.jpg" alt="">' if i['img'] and not i.get('video') else ''
     catn={c:a for c,a,e in CATS}[i['cat']]
-    page=head(i['title']+' | اتحاد المستثمرات العرب',desc,url,imgurl(i),'article')+header(i['cat'])+f'''<div class="art"><a class="back" href="/#{i['cat']}">← {catn} · العودة للأخبار</a><div><span class="tag">{i['tag']}</span> <span class="date">{i['date']}</span></div><h1>{E(i['title'])}</h1><div class="en-h">{E(i['en_title'])}</div><div class="ht">{HT(i)}</div>{im}{body}{vid}<div class="en-t">{''.join('<p>'+E(p)+'</p>' for p in i['en'])}</div>
-<div class="share"><span>مشاركة · Share:</span><a target="_blank" rel="noopener" id="wa">WhatsApp</a><a target="_blank" rel="noopener" id="fbs">Facebook</a><button type="button" id="cp">نسخ الرابط · Copy link</button></div></div>{FOOT}
+    page=head(i['title']+' | اتحاد المستثمرات العرب',desc,url,imgurl(i),'article')+header(i['cat'])+f'''<div class="art"><a class="back" href="/#{i['cat']}">← {catn} · العودة للأخبار</a><div><span class="tag">{i['tag']}</span> <span class="date">{i['date']}</span></div><h1>{E(i['title'])}</h1><div class="en-h">{E(i['en_title'])}</div><div class="ht">{HT(i)}</div>{LB}{im}{body}{vid}<div class="en-t">{''.join('<p>'+E(p)+'</p>' for p in i['en'])}</div>
+{SHB}</div>{FOOT}
 '''+SHARE_JS
     os.makedirs(f"{OUT}/news/{i['id']}"); open(f"{OUT}/news/{i['id']}/index.html",'w',encoding='utf-8').write(page)
 # home
