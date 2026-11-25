@@ -194,6 +194,36 @@ print(len(items),'items')
 
 for _f in glob.glob("google*.html"): shutil.copy(_f,OUT+"/"+_f)
 
+
+# ---- archive page + hamburger menu ----
+_arch=''.join(f'<li><a href="/news/{i["id"]}/"><span>{E(i["title"])}</span><time>{i["date"]}</time></a></li>' for i in items)
+_ap=head('الأخبار السابقة | اتحاد المستثمرات العرب','أرشيف أخبار اتحاد المستثمرات العرب',SITE+'/archive/',SITE+'/img/logo.jpg','website')+header('home')+'<div class="art"><h1>الأخبار السابقة</h1><p style="color:var(--mute);font-size:17px">كل أخبار الاتحاد مرتبة من الأحدث إلى الأقدم ('+str(len(items))+' خبر)</p><ul class="arch">'+_arch+'</ul></div><style>.arch{list-style:none;padding:0;margin:18px 0}.arch li{border-bottom:1px solid var(--line)}.arch a{display:flex;flex-direction:column;gap:2px;padding:12px 4px;font-size:19px;line-height:1.6}.arch time{color:var(--mute);font-size:14px}.arch a:hover span{color:var(--gold)}</style></body></html>'
+os.makedirs(OUT+'/archive',exist_ok=True); open(OUT+'/archive/index.html','w',encoding='utf-8').write(_ap)
+_MCSS='#hb{background:none;border:1px solid var(--line,#2a3344);color:#e8ecf2;border-radius:10px;width:44px;height:44px;font-size:26px;line-height:1;cursor:pointer;flex:none;margin-inline-end:10px}#hb:hover{border-color:#d4a437;color:#d4a437}#hb.fab{position:fixed;z-index:9998;bottom:16px;right:16px;background:#0d1117;box-shadow:0 4px 14px rgba(0,0,0,.4);margin:0;border-color:#d4a437}#mo{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;opacity:0;pointer-events:none;transition:opacity .2s}#mp{position:fixed;top:0;bottom:0;right:0;width:min(86vw,340px);background:#111823;color:#e8ecf2;z-index:10001;transform:translateX(105%);transition:transform .22s;overflow:auto;direction:rtl;font:18px/1.6 Tahoma,Arial,sans-serif;padding:14px 0 30px;box-shadow:-8px 0 30px rgba(0,0,0,.5)}body.mop #mo{opacity:1;pointer-events:auto}body.mop #mp{transform:none}#mp h3{margin:16px 20px 4px;font-size:13px;color:#d4a437;letter-spacing:.5px}#mp a{display:block;padding:11px 20px;color:#e8ecf2;text-decoration:none;border-bottom:1px solid #1d2635}#mp a:hover,#mp a:focus{background:#1a2333;color:#d4a437}#mp .mh{display:flex;justify-content:space-between;align-items:center;padding:0 20px 8px;font-weight:bold;font-size:19px}#mp .mh button{background:none;border:0;color:#9aa5b5;font-size:28px;cursor:pointer}'
+import json as _j
+def _menu(groups,fab):
+    h=''.join('<h3>'+t+'</h3>'+''.join('<a href="'+u+'"'+(' target="_blank" rel="noopener"' if u.startswith('http') else '')+'>'+l+'</a>' for l,u in L) for t,L in groups)
+    return ('<style>'+_MCSS+'</style><div id="mo"></div><nav id="mp" aria-label="القائمة"><div class="mh"><span>القائمة</span><button id="mx" aria-label="إغلاق">×</button></div>'+h+'</nav>'
+      '<script>(function(){var bt=document.getElementById("hb");if(!bt)return;function o(v){document.body.classList.toggle("mop",v);bt.setAttribute("aria-expanded",v)}bt.onclick=function(){o(!document.body.classList.contains("mop"))};document.getElementById("mo").onclick=function(){o(0)};document.getElementById("mx").onclick=function(){o(0)};document.querySelectorAll("#mp a").forEach(function(a){a.addEventListener("click",function(){o(0)})});addEventListener("keydown",function(e){if(e.key==="Escape")o(0)})})()</script>')
+_PUB=[('الأخبار',[('الرئيسية','/#home'),('آخر الأخبار','/#news'),('الأخبار السابقة','/archive/')]),
+      ('الأقسام',[(a,'/#'+c) for c,a,e in CATS]+[('تغطيات القنوات والإعلام','/#media'),('فيديوهات','/#videos'),('عن الاتحاد','/#about')]),
+      ('الإدارة',[('لوحة التحكم','/admin/'),('إضافة خبر','/admin/#/collections/news/new'),('عدد المشاهدات','/admin/views.html')]),
+      ('روابط',[('فيسبوك',FB),('يوتيوب','https://www.youtube.com/@ArabWomenInvestorsUnion'),('الموقع الرسمي awiu.net','https://awiu.net')])]
+_ADM=[('الإدارة',[('إضافة خبر','/admin/#/collections/news/new'),('الأخبار السابقة (كل الأخبار)','/admin/#/collections/news'),('المسودات والنشر','/admin/#/workflow'),('الصور','/admin/#/media'),('عدد المشاهدات','/admin/views.html')]),
+      ('الموقع',[('الصفحة الرئيسية','/'),('آخر الأخبار','/#news'),('الأخبار السابقة (الأرشيف)','/archive/')])]
+for _p in glob.glob(OUT+'/**/*.html',recursive=True):
+    if '/google' in _p: continue
+    _t=open(_p,encoding='utf-8').read()
+    if '/admin/' in _p:
+        if _p.endswith('/admin/index.html') and 'id="hb"' not in _t:
+            _t=_t.replace('</body>','<button id="hb" class="fab" aria-label="القائمة" aria-expanded="false">&#9776;</button>'+_menu(_ADM,1)+'</body>',1)
+            open(_p,'w',encoding='utf-8').write(_t)
+        continue
+    if 'class="wrap nav"' not in _t or 'id="hb"' in _t: continue
+    _t=_t.replace('<div class="wrap nav">','<div class="wrap nav"><button id="hb" aria-label="القائمة" aria-expanded="false">&#9776;</button>',1)
+    _t=_t.replace('</body>',_menu(_PUB,0)+'</body>',1)
+    open(_p,'w',encoding='utf-8').write(_t)
+
 # ---- PWA (site) ----
 open(OUT+'/manifest.webmanifest','w',encoding='utf-8').write(json.dumps({"id":"/","name":"أخبار الاتحاد - اتحاد المستثمرات العرب","short_name":"أخبار الاتحاد","description":"أخبار اتحاد المستثمرات العرب","lang":"ar","dir":"rtl","start_url":"/","scope":"/","display":"standalone","background_color":"#0d1117","theme_color":"#0d1117","icons":[{"src":"/img/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"/img/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},{"src":"/img/icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]},ensure_ascii=False))
 open(OUT+'/sw.js','w').write("self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request))});")
