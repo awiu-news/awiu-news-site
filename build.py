@@ -183,3 +183,14 @@ open(OUT+'/robots.txt','w').write(f"User-agent: *\n{'Disallow' if 'preview' in S
 print(len(items),'items')
 
 for _f in glob.glob("google*.html"): shutil.copy(_f,OUT+"/"+_f)
+
+# ---- PWA (site) ----
+open(OUT+'/manifest.webmanifest','w',encoding='utf-8').write(json.dumps({"id":"/","name":"اتحاد المستثمرات العرب","short_name":"المستثمرات العرب","description":"أخبار اتحاد المستثمرات العرب","lang":"ar","dir":"rtl","start_url":"/","scope":"/","display":"standalone","background_color":"#0d1117","theme_color":"#0d1117","icons":[{"src":"/img/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"/img/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},{"src":"/img/icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]},ensure_ascii=False))
+open(OUT+'/sw.js','w').write("self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request))});")
+for _p in glob.glob(OUT+'/**/*.html',recursive=True):
+    if '/admin/' in _p or '/google' in _p: continue
+    _t=open(_p,encoding='utf-8').read()
+    if 'manifest.webmanifest' in _t or '</head>' not in _t: continue
+    _t=_t.replace('</head>','<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#0d1117"><link rel="apple-touch-icon" href="/img/icon-192.png"></head>',1)
+    _t=_t.replace('</body>','<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js")</script></body>',1)
+    open(_p,'w',encoding='utf-8').write(_t)
