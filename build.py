@@ -207,9 +207,8 @@ def _menu(groups,fab):
       '<script>(function(){var bt=document.getElementById("hb");if(!bt)return;function o(v){document.body.classList.toggle("mop",v);bt.setAttribute("aria-expanded",v)}bt.onclick=function(){o(!document.body.classList.contains("mop"))};document.getElementById("mo").onclick=function(){o(0)};document.getElementById("mx").onclick=function(){o(0)};document.querySelectorAll("#mp a").forEach(function(a){a.addEventListener("click",function(){o(0)})});addEventListener("keydown",function(e){if(e.key==="Escape")o(0)})})()</script>')
 _PUB=[('الأخبار',[('الرئيسية','/#home'),('آخر الأخبار','/#news'),('الأخبار السابقة','/archive/')]),
       ('الأقسام',[(a,'/#'+c) for c,a,e in CATS]+[('تغطيات القنوات والإعلام','/#media'),('فيديوهات','/#videos'),('عن الاتحاد','/#about')]),
-      ('الإدارة',[('لوحة التحكم','/admin/'),('إضافة خبر','/admin/#/collections/news/new'),('عدد المشاهدات','/admin/views.html')]),
       ('روابط',[('فيسبوك',FB),('يوتيوب','https://www.youtube.com/@ArabWomenInvestorsUnion'),('الموقع الرسمي awiu.net','https://awiu.net')])]
-_ADM=[('الإدارة',[('إضافة خبر','/admin/#/collections/news/new'),('الأخبار السابقة (كل الأخبار)','/admin/#/collections/news'),('المسودات والنشر','/admin/#/workflow'),('الصور','/admin/#/media'),('عدد المشاهدات','/admin/views.html')]),
+_ADM=[('الإدارة',[('لوحة التحكم','/admin/#/'),('إضافة خبر','/admin/#/collections/news/new'),('الأخبار السابقة (كل الأخبار)','/admin/#/collections/news'),('المسودات والنشر','/admin/#/workflow'),('الصور','/admin/#/media'),('عدد المشاهدات','/admin/views.html')]),
       ('الموقع',[('الصفحة الرئيسية','/'),('آخر الأخبار','/#news'),('الأخبار السابقة (الأرشيف)','/archive/')])]
 for _p in glob.glob(OUT+'/**/*.html',recursive=True):
     if '/google' in _p: continue
