@@ -1,0 +1,52 @@
+backend:
+  name: github
+  repo: awiu-news/awiu-news-site
+  branch: main
+  base_url: SITE_URL_PLACEHOLDER
+  auth_endpoint: api/auth
+publish_mode: editorial_workflow
+locale: ar
+media_folder: img
+public_folder: /img
+collections:
+  - name: news
+    label: "الأخبار · News"
+    label_singular: "خبر"
+    folder: content
+    extension: json
+    format: json
+    create: true
+    slug: "{{fields.id}}"
+    summary: "{{date_text}}{{date_iso}} · {{title}}"
+    fields:
+      - {label: "معرف قصير بالإنجليزية (حروف صغيرة وشرطة فقط، مثال: nile-forum)", name: id, widget: string, pattern: ['^[a-z0-9-]+$', "حروف إنجليزية صغيرة وأرقام وشرطة فقط"]}
+      - {label: "العنوان (عربي)", name: title, widget: string}
+      - {label: "Title (English)", name: en_title, widget: string, required: false}
+      - {label: "التاريخ", name: date_iso, widget: datetime, date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD", required: false, hint: "اختر التاريخ. اتركه فارغا لو ستكتب تاريخا نصيا"}
+      - {label: "تاريخ نصي (اختياري، مثال: أكتوبر 2026 أو 25 و26 نوفمبر 2026)", name: date_text, widget: string, required: false}
+      - label: "القسم الرئيسي"
+        name: cat
+        widget: select
+        options:
+          - {label: "زيارات · Visits", value: visits}
+          - {label: "ملتقيات · Forums", value: forums}
+          - {label: "أخبار القمة · Summit News", value: summit}
+          - {label: "مشاركات دولية · International", value: intl}
+          - {label: "اتفاقيات وبروتوكولات · Agreements", value: agreements}
+      - label: "أقسام إضافية (اختياري)"
+        name: cats
+        widget: select
+        multiple: true
+        required: false
+        options:
+          - {label: "زيارات · Visits", value: visits}
+          - {label: "ملتقيات · Forums", value: forums}
+          - {label: "أخبار القمة · Summit News", value: summit}
+          - {label: "مشاركات دولية · International", value: intl}
+          - {label: "اتفاقيات وبروتوكولات · Agreements", value: agreements}
+      - {label: "وسم القسم على البطاقة (مثال: زيارات)", name: tag, widget: string}
+      - {label: "الصورة", name: image, widget: image, required: false, media_library: {config: {max_file_size: 4000000}}}
+      - {label: "رابط فيديو يوتيوب (كود الفيديو فقط، اختياري)", name: video, widget: string, required: false}
+      - {label: "الخبر بالعربية (كل فقرة في خانة)", name: ar, widget: list, field: {label: "فقرة", name: p, widget: text}}
+      - {label: "Article in English (one paragraph per box)", name: en, widget: list, required: false, field: {label: "Paragraph", name: p, widget: text}}
+      - {label: "الهاشتاجات (بدون #، بشرطة سفلية بدل المسافة)", name: tags, widget: list, required: false}
